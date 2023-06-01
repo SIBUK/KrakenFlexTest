@@ -50,7 +50,7 @@ __*python -m unittest discover -s tests -t tests*__
 
 ### Known Issues
 
-Occasionally when running the app in Windows you may receive thi error as the app exits:
+Occasionally when running the app in Windows you may receive this error as the app exits:
 ###### __*ERROR ShutdownHookManager: Exception while deleting Spark temp dir*__ 
  
 This appears to be an issue with the ShutdownHook inside PySpark where it sometimes fails while deleting its own temporary files. It isn't related to anything I've done in my app, and unfortunately there does not appear to be a fix for it currently.

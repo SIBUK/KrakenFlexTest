@@ -1,11 +1,14 @@
 import time
+from http import HTTPStatus
+
 import requests
 import logging
 
 # Normally we would never include this key in the file, but for the purposes of this test it is safe (and convenient) to do so
-API_KEY     = 'EltgJ5G8m44IzwE6UN2Y4B4NjPW77Zk6FJK3lL23'
-MAX_RETRIES = 5
-KRAKEN_URL  = 'https://api.krakenflex.systems/interview-tests-mock-api/v1/'
+API_KEY          = 'EltgJ5G8m44IzwE6UN2Y4B4NjPW77Zk6FJK3lL23'
+MAX_RETRIES      = 5
+KRAKEN_URL       = 'https://api.krakenflex.systems/interview-tests-mock-api/v1/'
+RETRY_DELAY_SECS = 1
 
 
 # Custom Exception raised when number of retries exceeded
@@ -44,10 +47,10 @@ class WebRequest():
                 # Here we deal with the case of a returned 500 status code and retry the request up to 5 times with a slight pause in between.
                 # Other status codes can be added here if need be, but for the purposes of this test just 500 is required
                 # and if anything else terrible happens we raise an exception
-                if response.status_code in [500]:
+                if response.status_code in [HTTPStatus.INTERNAL_SERVER_ERROR]:
                     retries += 1
                     logging.info("Retrying...")
-                    time.sleep(1)
+                    time.sleep(RETRY_DELAY_SECS)
                     continue
                 else:
                     raise Exception(e)
@@ -85,10 +88,10 @@ class WebRequest():
                 # Here we deal with the case of a returned 500 status code and retry the request up to 5 times with a slight pause in between.
                 # Other status codes can be added here if need be, but for the purposes of this test just 500 is required
                 # and if anything else terrible happens we raise an exception
-                if response.status_code in [500]:
+                if response.status_code in [HTTPStatus.INTERNAL_SERVER_ERROR]:
                     retries += 1
                     logging.info("Retrying...")
-                    time.sleep(1)
+                    time.sleep(RETRY_DELAY_SECS)
                     continue
                 else:
                     raise Exception(e)
@@ -107,7 +110,7 @@ class WebRequest():
         url = KRAKEN_URL + 'outages'
         r = self.__do_get_request_call_and_get_response(url)
         status_code = r.status_code
-        if status_code == 200:
+        if status_code == HTTPStatus.OK:
             json_object = r.json()
             return json_object, status_code
         else:
@@ -118,7 +121,7 @@ class WebRequest():
         url = KRAKEN_URL + 'site-info/' + site_name
         response = self.__do_get_request_call_and_get_response(url)
         status_code = response.status_code
-        if status_code == 200:
+        if status_code == HTTPStatus.OK:
             json_object = response.json()
 
             id = json_object['id']

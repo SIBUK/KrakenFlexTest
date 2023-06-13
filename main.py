@@ -1,4 +1,5 @@
 import json
+from http import HTTPStatus
 from data_functions import filter_out_unwanted_outage_begin_dates, join_data
 import logging
 
@@ -24,9 +25,7 @@ def main():
     status_code = req.post_site_outages('norwich-pear-tree', post_json)
     logging.info("Final Status Code: " + str(status_code))
 
-    success = status_code == 200
-
-    if success:
+    if status_code == HTTPStatus.OK:
         print("Task completed successfully!")
     else:
         print("An issue occurred while completing the task.")

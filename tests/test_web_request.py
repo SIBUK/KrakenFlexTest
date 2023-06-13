@@ -1,4 +1,5 @@
 import unittest
+from http import HTTPStatus
 from unittest.mock import patch, MagicMock
 
 import requests
@@ -10,7 +11,7 @@ class TestOutagesClass(unittest.TestCase):
     # Test that the outages class is fetching JSON data from its endpoint correctly
     @patch('web_request.requests')
     def test_web_request_get_outages_json_success(self, mock_requests):
-        mock_response = MagicMock(status_code=200)
+        mock_response = MagicMock(status_code=HTTPStatus.OK)
         mock_response.json.return_value =  \
             [{'id': 'mock_id_1', 'begin': 'mock_begin_1', 'end': 'mock_end_1'},
              {'id': 'mock_id_2', 'begin': 'mock_begin_2', 'end': 'mock_end_2'}]
@@ -21,7 +22,7 @@ class TestOutagesClass(unittest.TestCase):
         json_object, status_code = t.get_outages_json()
 
         # Test that the status code is 200 for success
-        self.assertEqual(status_code, 200)
+        self.assertEqual(status_code, HTTPStatus.OK)
         # Test that is has returned a list
         self.assertIsInstance(json_object, list)
         # Test that the list contains the correct data
@@ -35,7 +36,7 @@ class TestOutagesClass(unittest.TestCase):
 
     @patch('web_request.requests')
     def test_web_request_get_outages_json_fail(self, mock_requests):
-        mock_response = MagicMock(status_code=403)
+        mock_response = MagicMock(status_code=HTTPStatus.FORBIDDEN)
         mock_response.json.return_value = None
 
         mock_requests.get.return_value = mock_response
@@ -44,13 +45,13 @@ class TestOutagesClass(unittest.TestCase):
         json_object, status_code = t.get_outages_json()
 
         # Test that the status code is 403 for success
-        self.assertEqual(status_code, 403)
+        self.assertEqual(status_code, HTTPStatus.FORBIDDEN)
         # Test that is has returned a list
         self.assertEqual(json_object, None)
 
     @patch('web_request.requests')
     def test_web_request_post_site_outages_with_valid_site_and_data(self, mock_requests):
-        mock_response = MagicMock(status_code=200)
+        mock_response = MagicMock(status_code=HTTPStatus.OK)
         mock_requests.post.return_value = mock_response
 
         t = WebRequest()
@@ -61,12 +62,12 @@ class TestOutagesClass(unittest.TestCase):
 
         status_code = t.post_site_outages('some-invalid-site', json_payload)
 
-        self.assertEqual(status_code, 200)
+        self.assertEqual(status_code, HTTPStatus.OK)
 
 
     @patch('web_request.requests')
     def test_web_request_post_site_outages_with_invalid_data_but_correct_site(self, mock_requests):
-        mock_response = MagicMock(status_code=400)
+        mock_response = MagicMock(status_code=HTTPStatus.BAD_REQUEST)
         mock_response.raise_for_status.side_effect = requests.HTTPError('400 Client Error')
 
         mock_requests.exceptions = requests.exceptions
@@ -86,7 +87,7 @@ class TestOutagesClass(unittest.TestCase):
 
     @patch('web_request.requests')
     def test_web_request_post_site_outages_with_invalid_site(self, mock_requests):
-        mock_response = MagicMock(status_code=404)
+        mock_response = MagicMock(status_code=HTTPStatus.NOT_FOUND)
         mock_response.raise_for_status.side_effect = requests.HTTPError('404 Client Error')
 
         mock_requests.exceptions = requests.exceptions
@@ -106,7 +107,7 @@ class TestOutagesClass(unittest.TestCase):
 
     @patch('web_request.requests')
     def test_web_request_get_site_info_json_known_good(self, mock_requests):
-        mock_response = MagicMock(status_code=200)
+        mock_response = MagicMock(status_code=HTTPStatus.OK)
         mock_response.json.return_value =  \
             {'id': 'norwich-pear-tree', 'name': 'Norwich Pear Tree',
             'devices': [{'id': '111183e7-fb90-436b-9951-63392b36bdd2', 'name': 'Battery 1'},
@@ -118,7 +119,7 @@ class TestOutagesClass(unittest.TestCase):
         json_object, status_code = t.get_site_info_json('norwich-pear-tree')
 
         # Test that the status code is 200 for success
-        self.assertEqual(status_code, 200)
+        self.assertEqual(status_code, HTTPStatus.OK)
         # Test that is has returned a list
         self.assertIsInstance(json_object, list)
         # Test that the list contains data
@@ -130,7 +131,7 @@ class TestOutagesClass(unittest.TestCase):
 
     @patch('web_request.requests')
     def test_web_request_get_site_info_json_known_bad(self, mock_requests):
-        mock_response = MagicMock(status_code=404)
+        mock_response = MagicMock(status_code=HTTPStatus.NOT_FOUND)
         mock_response.raise_for_status.side_effect = requests.HTTPError('404 Client Error')
 
         mock_requests.exceptions = requests.exceptions
@@ -147,7 +148,7 @@ class TestOutagesClass(unittest.TestCase):
     # Test that the SiteInfo class is fetching JSON data from its endpoint correctly
     @patch('web_request.requests')
     def test_web_request_get_site_info_wrong_site_returned(self, mock_requests):
-        mock_response = MagicMock(status_code=200)
+        mock_response = MagicMock(status_code=HTTPStatus.OK)
         mock_response.json.return_value =  \
             {'id': 'wrong-site-name', 'name': 'Norwich Pear Tree',
             'devices': [{'id': '111183e7-fb90-436b-9951-63392b36bdd2', 'name': 'Battery 1'},
@@ -163,7 +164,7 @@ class TestOutagesClass(unittest.TestCase):
     # Test that the Error 500 retries functionality is working correctly during GET requests
     @patch('web_request.requests')
     def test_get_web_request_retries(self, mock_requests):
-        mock_response = MagicMock(status_code=500)
+        mock_response = MagicMock(status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
         mock_response.raise_for_status.side_effect = requests.HTTPError('500 Client Error')
 
         mock_requests.exceptions = requests.exceptions
@@ -180,7 +181,7 @@ class TestOutagesClass(unittest.TestCase):
     # Test that the Error 500 retries functionality is working correctly during POST requests
     @patch('web_request.requests')
     def test_post_web_request_retries(self, mock_requests):
-        mock_response = MagicMock(status_code=500)
+        mock_response = MagicMock(status_code=HTTPStatus.INTERNAL_SERVER_ERROR)
         mock_response.raise_for_status.side_effect = requests.HTTPError('500 Client Error')
 
         mock_requests.exceptions = requests.exceptions
